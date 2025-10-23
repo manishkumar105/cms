@@ -5,7 +5,8 @@
 - Only authenticated users can access posts and the dashboard (enforced via custom AuthMiddleware)
 - Users can create, view, and manage multiple posts, with pagination for easy navigation.
 - Included policies to restrict edit/delete to post owners.
-
+- Added asynchronous welcome email for new user registration using Laravel Events and Listeners with Jobs and Queue, 
+  improving performance and user experience.
 
 # Soft Delete
 Implemented soft delete for posts so that deleted posts remain in the database.

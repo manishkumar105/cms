@@ -7,6 +7,7 @@ use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Events\UserRegistered;
 
 
 class AuthController extends Controller
@@ -19,30 +20,31 @@ class AuthController extends Controller
     public function registration(Request $request)
     {
         $validated = $request->validate([
-            "name"=>"required|string",
-            "email"=>"required|email|unique:users",
-            "password"=>"required|min:6|confirmed",
-            "gender"=>"required|in:male,female",
-            "state"=>"required|string",
-            "city"=>"required|string",
-            "hobbies"=>"required|array",
-            "hobbies.*"=>"string",
-            "image"=>"required|mimes:jpeg,png,jpg,gif|max:2048",
+            "name" => "required|string",
+            "email" => "required|email|unique:users",
+            "password" => "required|min:6|confirmed",
+            "gender" => "required|in:male,female",
+            "state" => "required|string",
+            "city" => "required|string",
+            "hobbies" => "required|array",
+            "hobbies.*" => "string",
+            "image" => "required|mimes:jpeg,png,jpg,gif|max:2048",
         ]);
         $validated["password"] = Hash::make($request->password);
         $validated["hobbies"] = json_encode($validated["hobbies"]);
 
-        if($request->hasFile("image")){
+        if ($request->hasFile("image")) {
             $file = $request->file("image");
-            $filename = "profile_".time().".".$file->getClientOriginalExtension();
-            $path = $file->storeAs("profile",$filename,"public");
+            $filename = "profile_" . time() . "." . $file->getClientOriginalExtension();
+            $path = $file->storeAs("profile", $filename, "public");
             $validated["image"] = $path;
         }
         // dd($request->all());
 
-        User::create($validated);
-        return redirect()->route("auth.showLogin")->with("success","Registration Successfully Done, Please Login");
-
+        $user = User::create($validated);
+        // fire event
+        event(new UserRegistered($user));
+        return redirect()->route("auth.showLogin")->with("success", "Registration Successfully Done, Please Login");
     }
 
     public function showLogin()
@@ -53,15 +55,15 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            "email"=>"required|email",
-            "password"=>"required|min:6"
+            "email" => "required|email",
+            "password" => "required|min:6"
         ]);
-        if(Auth::attempt($credentials)){
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->route("auth.dashboard");
-        }else{
+        } else {
             return back()->withErrors([
-                "email"=>"Invalid Credentials",
+                "email" => "Invalid Credentials",
             ]);
         }
     }
