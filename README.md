@@ -5,8 +5,14 @@
 - Only authenticated users can access posts and the dashboard (enforced via custom AuthMiddleware)
 - Users can create, view, and manage multiple posts, with pagination for easy navigation.
 - Included policies to restrict edit/delete to post owners.
-- Added asynchronous welcome email for new user registration using Laravel Events and Listeners with Jobs and Queue, 
-  improving performance and user experience.
+
+# User Registration Welcome Email:
+- Users receive a welcome email immediately after registering
+- Used Laravel Events (UserRegistered) and Listeners (SendWelcomeEmail) to trigger emails.
+- Emails are queued using Laravel’s database queue for better performance.
+- Implemented ShouldQueue on both listener and mailable for async processing.
+- Queue worker processes emails without blocking user registration flow.
+- Email template uses Blade Markdown components for a clean, responsive design.
 
 # Soft Delete
 Implemented soft delete for posts so that deleted posts remain in the database.
